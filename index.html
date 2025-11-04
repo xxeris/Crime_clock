@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>台灣犯罪時鐘統計 2014-2023</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+            background: linear-gradient(135deg, #e0f2fe 0%, #ddd6fe 100%);
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 32px;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .header-card h1 {
+            font-size: 2.5rem;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+
+        .header-card p {
+            color: #6b7280;
+            font-size: 1.125rem;
+        }
+
+        .main-display {
+            background: linear-gradient(135deg, #6366f1 0%, #9333ea 100%);
+            border-radius: 16px;
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+            padding: 32px;
+            margin-bottom: 24px;
+            color: white;
+        }
+
+        .year-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+
+        .year-header h2 {
+            font-size: 2rem;
+            margin-left: 12px;
+        }
+
+        .year-note {
+            background: rgba(255, 255, 255, 0.2);
+            display: inline-block;
+            padding: 8px 24px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .stat-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+
+        .stat-value {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            opacity: 0.9;
+        }
+
+        .trend {
+            display: flex;
+            align-items: center;
+            margin-top: 12px;
+        }
+
+        .trend-up {
+            color: #fca5a5;
+        }
+
+        .trend-down {
+            color: #86efac;
+        }
+
+        .year-selector {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .year-selector h3 {
+            font-size: 1.25rem;
+            color: #1f2937;
+            margin-bottom: 16px;
+        }
+
+        .year-buttons {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+        }
+
+        .year-btn {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .year-btn:hover {
+            background: #e5e7eb;
+        }
+
+        .year-btn.active {
+            background: #6366f1;
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 4px 6px rgba(99, 102, 241, 0.3);
+        }
+
+        .data-table {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        .table-header {
+            background: linear-gradient(135deg, #6366f1 0%, #9333ea 100%);
+            padding: 24px;
+        }
+
+        .table-header h3 {
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #f9fafb;
+        }
+
+        th {
+            padding: 16px 24px;
+            text-align: left;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        th.text-right {
+            text-align: right;
+        }
+
+        th.text-center {
+            text-align: center;
+        }
+
+        td {
+            padding: 16px 24px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        td.text-right {
+            text-align: right;
+        }
+
+        td.text-center {
+            text-align: center;
+        }
+
+        tr:hover {
+            background: #eef2ff;
+        }
+
+        tr.selected {
+            background: #ddd6fe;
+        }
+
+        .info-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .info-card h3 {
+            font-size: 1.25rem;
+            color: #1f2937;
+            margin-bottom: 16px;
+        }
+
+        .info-content {
+            color: #6b7280;
+            line-height: 1.6;
+        }
+
+        .info-content p {
+            margin-bottom: 12px;
+        }
+
+        .info-content strong {
+            color: #1f2937;
+        }
+
+        .trend-card {
+            background: linear-gradient(135deg, #f0fdf4 0%, #d1fae5 100%);
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 24px;
+        }
+
+        .trend-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .trend-stat-box {
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .trend-stat-box p:first-child {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 4px;
+        }
+
+        .trend-stat-box p:last-child {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .mono {
+            font-family: 'Courier New', monospace;
+        }
+
+        .icon {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            margin-right: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .year-buttons {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .header-card h1 {
+                font-size: 1.75rem;
+            }
+
+            .stat-value {
+                font-size: 2rem;
+            }
+
+            table {
+                font-size: 0.875rem;
+            }
+
+            th, td {
+                padding: 12px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-card">
+            <h1>台灣犯罪時鐘統計</h1>
+            <p>2014-2023 年全般刑案發生數分析</p>
+        </div>
+
+        <div class="main-display">
+            <div class="year-header">
+                <span class="icon">📅</span>
+                <h2 id="currentYear">2023</h2>
+                <span style="margin-left: 8px;">年</span>
+            </div>
+            
+            <div class="year-note">
+                <p id="currentNote">民國112年</p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3><span class="icon">⏰</span>犯罪時鐘</h3>
+                    <div class="stat-value" id="crimeClockDisplay">1分54秒</div>
+                    <div class="stat-label">平均每件刑案發生間隔</div>
+                </div>
+
+                <div class="stat-card">
+                    <h3><span class="icon">📊</span>刑案統計</h3>
+                    <div class="stat-value" id="casesDisplay">276,491</div>
+                    <div class="stat-label">全年刑案發生總數</div>
+                    <div class="trend" id="trendDisplay"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="year-selector">
+            <h3>選擇年份</h3>
+            <div class="year-buttons" id="yearButtons"></div>
+        </div>
+
+        <div class="data-table">
+            <div class="table-header">
+                <h3>十年完整統計資料</h3>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>年份</th>
+                        <th>民國年</th>
+                        <th class="text-right">刑案發生數</th>
+                        <th class="text-center">犯罪時鐘</th>
+                        <th class="text-center">年變化率</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+
+        <div class="info-card">
+            <h3>計算說明</h3>
+            <div class="info-content">
+                <p><strong>犯罪時鐘定義：</strong>平均每件刑案發生的時間間隔</p>
+                <p><strong>計算公式：</strong>當期總時間（秒）÷ 當期刑案發生數</p>
+                <p><strong>一年秒數：</strong>365.25 × 24 × 60 × 60 = 31,557,600 秒（考慮閏年）</p>
+                <p style="padding-top: 12px; border-top: 1px solid #e5e7eb;"><strong>資料來源：</strong>內政部警政署刑事警察局</p>
+                <p style="font-size: 0.875rem; color: #9ca3af;">註：2020年數據為估算值，其他年份為官方統計數據</p>
+            </div>
+        </div>
+
+        <div class="trend-card">
+            <h3 style="margin-bottom: 16px; color: #1f2937;">十年趨勢觀察</h3>
+            <div class="trend-stats">
+                <div class="trend-stat-box">
+                    <p>2014年</p>
+                    <p style="color: #1f2937;">1分43秒</p>
+                </div>
+                <div class="trend-stat-box">
+                    <p>2023年</p>
+                    <p style="color: #1f2937;">1分54秒</p>
+                </div>
+                <div class="trend-stat-box">
+                    <p>整體改善</p>
+                    <p style="color: #16a34a;">+10.6%</p>
+                </div>
+            </div>
+            <p style="font-size: 0.875rem; color: #6b7280;">
+                從2014年到2021年，台灣刑案發生數呈現連續下降趨勢，犯罪時鐘從1分43秒延長至2分9秒。
+                2022-2023年略有回升，主要受詐欺案件增加影響。
+            </p>
+        </div>
+    </div>
+
+    <script>
+        var crimeData = [
+            { year: 2014, cases: 306300, note: '民國103年' },
+            { year: 2015, cases: 297800, note: '民國104年' },
+            { year: 2016, cases: 294831, note: '民國105年' },
+            { year: 2017, cases: 293453, note: '民國106年' },
+            { year: 2018, cases: 284538, note: '民國107年' },
+            { year: 2019, cases: 269083, note: '民國108年' },
+            { year: 2020, cases: 253745, note: '民國109年，估算值' },
+            { year: 2021, cases: 244214, note: '民國110年' },
+            { year: 2022, cases: 265518, note: '民國111年' },
+            { year: 2023, cases: 276491, note: '民國112年' }
+        ];
+
+        function calculateCrimeClock(cases) {
+            var secondsPerYear = 365.25 * 24 * 60 * 60;
+            var secondsPerCase = secondsPerYear / cases;
+            var minutes = Math.floor(secondsPerCase / 60);
+            var seconds = Math.round(secondsPerCase % 60);
+            
+            return {
+                total: secondsPerCase,
+                minutes: minutes,
+                seconds: seconds,
+                formatted: minutes + '分' + seconds + '秒'
+            };
+        }
+
+        function calculateChange(current, previous) {
+            if (!previous) return null;
+            var change = ((current - previous) / previous * 100);
+            return parseFloat(change.toFixed(2));
+        }
+
+        var processedData = crimeData.map(function(item, index) {
+            var clock = calculateCrimeClock(item.cases);
+            var prevCases = index > 0 ? crimeData[index - 1].cases : null;
+            var caseChange = calculateChange(item.cases, prevCases);
+            
+            return {
+                year: item.year,
+                cases: item.cases,
+                note: item.note,
+                clock: clock,
+                caseChange: caseChange
+            };
+        });
+
+        var selectedYear = processedData.length - 1;
+
+        function updateDisplay() {
+            var data = processedData[selectedYear];
+            
+            document.getElementById('currentYear').textContent = data.year;
+            document.getElementById('currentNote').textContent = data.note;
+            document.getElementById('crimeClockDisplay').textContent = data.clock.formatted;
+            document.getElementById('casesDisplay').textContent = data.cases.toLocaleString();
+            
+            var trendDiv = document.getElementById('trendDisplay');
+            if (data.caseChange !== null) {
+                var arrow = data.caseChange > 0 ? '📈' : '📉';
+                var colorClass = data.caseChange > 0 ? 'trend-up' : 'trend-down';
+                var changeSign = data.caseChange > 0 ? '+' : '';
+                trendDiv.innerHTML = '<span style="margin-right: 8px;">' + arrow + '</span>' +
+                    '<span class="' + colorClass + '" style="font-weight: 600; font-size: 1.125rem;">' +
+                    changeSign + data.caseChange + '%</span>' +
+                    '<span style="margin-left: 8px; font-size: 0.875rem; opacity: 0.9;">較前一年</span>';
+            } else {
+                trendDiv.innerHTML = '';
+            }
+            
+            var buttons = document.querySelectorAll('.year-btn');
+            for (var i = 0; i < buttons.length; i++) {
+                if (i === selectedYear) {
+                    buttons[i].classList.add('active');
+                } else {
+                    buttons[i].classList.remove('active');
+                }
+            }
+            
+            var rows = document.querySelectorAll('#tableBody tr');
+            for (var j = 0; j < rows.length; j++) {
+                if (j === selectedYear) {
+                    rows[j].classList.add('selected');
+                } else {
+                    rows[j].classList.remove('selected');
+                }
+            }
+        }
+
+        function generateYearButtons() {
+            var container = document.getElementById('yearButtons');
+            for (var i = 0; i < processedData.length; i++) {
+                (function(index) {
+                    var item = processedData[index];
+                    var btn = document.createElement('button');
+                    btn.className = 'year-btn';
+                    btn.textContent = item.year;
+                    btn.onclick = function() {
+                        selectedYear = index;
+                        updateDisplay();
+                    };
+                    container.appendChild(btn);
+                })(i);
+            }
+        }
+
+        function generateTable() {
+            var tbody = document.getElementById('tableBody');
+            for (var i = 0; i < processedData.length; i++) {
+                (function(index) {
+                    var item = processedData[index];
+                    var row = document.createElement('tr');
+                    
+                    var changeHTML;
+                    if (item.caseChange !== null) {
+                        var changeColor = item.caseChange > 0 ? '#dc2626' : '#16a34a';
+                        var changeSign = item.caseChange > 0 ? '+' : '';
+                        changeHTML = '<span style="font-weight: 600; color: ' + changeColor + ';">' +
+                            changeSign + item.caseChange + '%</span>';
+                    } else {
+                        changeHTML = '<span style="color: #9ca3af;">-</span>';
+                    }
+                    
+                    row.innerHTML = '<td style="font-weight: 600; color: #1f2937;">' + item.year + '</td>' +
+                        '<td style="color: #6b7280;">' + item.note + '</td>' +
+                        '<td class="text-right mono" style="font-weight: 600; color: #1f2937;">' +
+                        item.cases.toLocaleString() + '</td>' +
+                        '<td class="text-center mono" style="font-weight: 600; color: #6366f1;">' +
+                        item.clock.formatted + '</td>' +
+                        '<td class="text-center">' + changeHTML + '</td>';
+                    
+                    row.style.cursor = 'pointer';
+                    row.onclick = function() {
+                        selectedYear = index;
+                        updateDisplay();
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    };
+                    
+                    tbody.appendChild(row);
+                })(i);
+            }
+        }
+
+        generateYearButtons();
+        generateTable();
+        updateDisplay();
+    </script>
+</body>
+</html>
